@@ -8,7 +8,6 @@ import com.arcsoft.face.toolkit.ImageInfo;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -22,24 +21,25 @@ public  class FaceEngineService {
     public static String appId = "6xLUZYEZvkMhJaphb5FBGhHNfqZDZUpBd5b7BuhV2pau";
     public static String sdkKey = "ARe8YTRj66xwMFBjzSbcxYceRavZQYfCya9jDgdjetZX";
     public static FaceEngine faceEngine = new FaceEngine("/root/cvLib");
+
     public boolean startFaceEngine(){
         System.out.println("start engine");
         int errorCode = faceEngine.activeOnline(appId, sdkKey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
-            System.out.println("fail active engine1");
+            System.out.println("fail active engine");
         }
         ActiveFileInfo activeFileInfo=new ActiveFileInfo();
         errorCode = faceEngine.getActiveFileInfo(activeFileInfo);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
             System.out.println("fail active engine");
         }
-        //引擎配置
+        //config
         EngineConfiguration engineConfiguration = new EngineConfiguration();
         engineConfiguration.setDetectMode(DetectMode.ASF_DETECT_MODE_IMAGE);
         engineConfiguration.setDetectFaceOrientPriority(DetectOrient.ASF_OP_ALL_OUT);
         engineConfiguration.setDetectFaceMaxNum(10);
         engineConfiguration.setDetectFaceScaleVal(16);
-        //功能配置
+        //config
         FunctionConfiguration functionConfiguration = new FunctionConfiguration();
         functionConfiguration.setSupportAge(true);
         functionConfiguration.setSupportFace3dAngle(true);
@@ -49,7 +49,7 @@ public  class FaceEngineService {
         functionConfiguration.setSupportLiveness(true);
         functionConfiguration.setSupportIRLiveness(true);
         engineConfiguration.setFunctionConfiguration(functionConfiguration);
-        //初始化引擎
+        //init
         errorCode = faceEngine.init(engineConfiguration);
 
         if (errorCode != ErrorInfo.MOK.getValue()) {
@@ -65,14 +65,15 @@ public  class FaceEngineService {
         InputStream inStream = conn.getInputStream();
         byte[] data = readInputStream(inStream);
         int errorCode = 0;
-        //人脸检测
         ImageInfo imageInfo = getRGBData(data);
         List<FaceInfo> faceInfoList = new ArrayList<FaceInfo>();
         errorCode = faceEngine.detectFaces(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList);
-        //特征提取
+
+
         FaceFeature faceFeature = new FaceFeature();
         errorCode = faceEngine.extractFaceFeature(imageInfo.getImageData(), imageInfo.getWidth(), imageInfo.getHeight(), imageInfo.getImageFormat(), faceInfoList.get(0), faceFeature);
         System.out.println("feature size：" + faceFeature.getFeatureData().length);
+
         return faceFeature.getFeatureData();
     }
 
